@@ -35,6 +35,8 @@ exige una SPA, la capa de modelos se puede exponer como API sin reescribir la l�
 
 ## Puesta en marcha local (SQLite, sin instalar nada más)
 
+**Linux / macOS (bash)**
+
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements-dev.txt
@@ -42,6 +44,20 @@ python -m flask --app stocktrack create-user --role admin        # primer admini
 python -m flask --app stocktrack seed-demo                       # opcional: catálogo y usuarios de demostración
 python -m flask --app stocktrack run                             # http://127.0.0.1:5000
 ```
+
+**Windows (PowerShell)** — ejecuta los comandos uno por uno (en PowerShell 5.1 no existe `&&`):
+
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1          # si lo bloquea la política de scripts: Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+pip install -r requirements-dev.txt # si falla psycopg2-binary y solo usarás SQLite: pip install Flask XlsxWriter reportlab pytest requests openpyxl pypdf tzdata
+python -m flask --app stocktrack create-user --role admin
+python -m flask --app stocktrack seed-demo                       # opcional
+python -m flask --app stocktrack run                             # http://127.0.0.1:5000
+```
+
+Las variables de entorno se definen distinto en PowerShell: `$env:DATABASE_URL = "postgresql://usuario:clave@localhost:5432/stocktrack"`
+(en bash: `export DATABASE_URL=...`). Esta guía de Windows no se probó en Windows; el proyecto se desarrolló y probó en Linux.
 
 Usuarios de demostración (**solo para pruebas; contraseñas públicas**): `admin / Admin12345`, `gerente / Gerente12345`,
 `almacen / Almacen12345`, `consulta / Consulta12345`.
