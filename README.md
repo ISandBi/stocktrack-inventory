@@ -21,14 +21,15 @@ exige una SPA, la capa de modelos se puede exponer como API sin reescribir la l�
 
 | Requerimiento | Implementación |
 |---|---|
-| Gestión de productos en stock | `models/products.py`, `models/stock.py`; el stock **solo** cambia con movimientos (entrada, salida, ajuste) y nunca queda negativo |
-| Reportes PDF y Excel | `services/reports.py` (inventario y movimientos, con filtros); Excel con fórmulas, totales y formato condicional |
+| Gestión de productos en stock | `models/products.py`, `models/stock.py`; el stock **solo** cambia con movimientos (Entrada por Compra, Salida por Venta, Salida por Devolución, Reserva de Stock con validación del administrador) y nunca queda negativo |
+| Reportes PDF y Excel | `services/reports.py` (diario, mensual, reservas y devoluciones; inventario y movimientos), foliados (`ST-AAAA-NNNNNN`) con SHA-256 y página de verificación; PDF con edición bloqueada y Excel protegido |
 | Alertas de escasez | `models/alerts.py`: una alerta vigente por producto (`stock ≤ mínimo`), notificación interna y correo SMTP; se resuelve sola al reponer |
-| Multiusuario con roles | Administrador, Gerente, Almacenista y Solo consulta (`security.py`, matriz en la pantalla *Usuarios*) |
+| Multiusuario con roles | Administrador, Encargado de inventario y Usuario de consulta; ingreso por correo; cierre por inactividad (`SESSION_IDLE_MINUTES`, 30 por defecto) (`security.py`) |
 | Máx. 100,000 registros activos | `MAX_ACTIVE_RECORDS`; bloqueo transaccional (también para altas simultáneas); archivar libera capacidad |
 | 10 usuarios concurrentes | Transacciones atómicas por movimiento; ver `docs/acceptance/` |
 | Escalabilidad | Índices, paginación en servidor, reportes por lotes (Excel en modo memoria constante), múltiples procesos con gunicorn |
-| Logo | `stocktrack/static/img/` (`logo.svg`, `logo-white.svg`, `icon.svg`, PNG); se regenera con `python scripts/build_logo.py` |
+| Logo | `stocktrack/static/img/` (`logo.png`, `icon.png`, `favicon.png`) |
+| Requerimientos | `docs/requisitos.md` (matriz RF/RNF ↔ pruebas), `docs/arquitectura.md` |
 | Kanban | `docs/kanban.md` |
 | ISO 9001 | `docs/iso9001.md` (matriz de trazabilidad; ver el alcance que declara) |
 | Pruebas de aceptación | `tests/acceptance/`, `docs/acceptance/*.xlsx` y `*.pptx` |
@@ -59,8 +60,7 @@ python -m flask --app stocktrack run                             # http://127.0.
 Las variables de entorno se definen distinto en PowerShell: `$env:DATABASE_URL = "postgresql://usuario:clave@localhost:5432/stocktrack"`
 (en bash: `export DATABASE_URL=...`). Esta guía de Windows no se probó en Windows; el proyecto se desarrolló y probó en Linux.
 
-Usuarios de demostración (**solo para pruebas; contraseñas públicas**): `admin / Admin12345`, `gerente / Gerente12345`,
-`almacen / Almacen12345`, `consulta / Consulta12345`.
+Usuarios de demostración (**solo para pruebas; contraseñas públicas**): `admin@stocktrack.local / Admin12345`, `encargado@stocktrack.local / Encargado12345`, `consulta@stocktrack.local / Consulta12345`.
 
 ## Producción (PostgreSQL)
 
@@ -97,9 +97,9 @@ solo internas; bitácora de auditoría de accesos, cambios, movimientos y descar
 
 ```
 stocktrack/        aplicación (models, views, templates, services, static, schema)
-tests/             unitarias, seguridad y tests/acceptance (casos PA-01…RN-02)
+tests/             unitarias, seguridad y tests/acceptance (casos PA-01…RNF)
 docs/              kanban.md, iso9001.md y docs/acceptance (Excel, pptx, results.json)
-scripts/           logo, Excel y pptx de aceptación
+scripts/           Excel y pptx de aceptación
 ```
 
 ## Extensión futura: ERP
