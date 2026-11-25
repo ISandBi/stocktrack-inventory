@@ -8,4 +8,4 @@ RUN useradd --create-home stocktrack && chown -R stocktrack /app
 USER stocktrack
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"
-CMD ["gunicorn", "-w", "4", "--threads", "2", "-b", "0.0.0.0:8000", "wsgi:app"]
+CMD ["sh", "-c", "python -m flask --app stocktrack seed-demo && gunicorn -w 4 --threads 2 -b 0.0.0.0:8000 wsgi:app"]
